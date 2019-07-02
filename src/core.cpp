@@ -46,7 +46,7 @@ void setup(){
 	DDRB  |= (1<<PB3);
 	PORTB |= (1<<PB3);
 
-	if(!LoRa.Initialize(&USART,0))
+	if(!LoRa.Initialize(&USART,1,0x08))
 		printf(PSTR("Lora Fail\n"));
 	else
 		printf_P(PSTR("Lora ok\n"));
@@ -62,9 +62,17 @@ void setup(){
 void loop(){
 
 	PORTB &= ~(1<<PB5);
-	_delay_ms(1000);
-	PORTB |= (1<<PB5);
-	_delay_ms(1000);
+	uint8_t dados[100]={0,0,0};
+	uint8_t tamanho=0;
+	if(USART.available()>0){
+		LoRa.Received(dados,&tamanho);
+		if((dados[0]=='o') && (dados[1]=='i'))
+			PORTB |= (1<<PB5);
+
+		USART.writeBytes(dados,tamanho);
+	}
+
+	_delay_ms(500);
 
 }
 
